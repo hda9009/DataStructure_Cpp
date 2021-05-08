@@ -1,10 +1,23 @@
 #include <iostream>
-#include <conio.h>
 #include <string>
 #include <vector>
 #include <cstring>
 #include <math.h>
-#include <bits/stdc++.h>
+
+#include <bits/stdc++.h>     // takes alot of time in compilation
+#include <utility>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <list>
+#include <map>
+#include <array>
+#include <numeric>
+#include <deque>
+#include <iomanip>
+
+// #include <windows.h>
+
 
 using namespace std;
 
@@ -14,7 +27,7 @@ struct Node
     struct Node *next;
 }*actual = NULL;
 
-void createNode(int dummy[], int n)
+Node * createNode(Node* actual, int dummy[], int n)
 {
     struct Node *temp, *last;
 
@@ -34,6 +47,8 @@ void createNode(int dummy[], int n)
         temp = NULL;
         delete [] temp;
     }
+
+    return actual;
 }
 
 tuple <int,int> countLinked(struct Node *p)
@@ -229,8 +244,8 @@ void sortingElement(Node *p)
     temp = p;
 
     int operation = 0;
-    cout << "1. Sorting List in Ascending Order\n" <<
-            "2. Sorting List in Descending Order\n" <<
+    cout << "1. Sorting List in Decending Order\n" <<
+            "2. Sorting List in Asscending Order\n" <<
             "Enter your choice: ";
     cin >> operation;
 
@@ -329,7 +344,7 @@ void reverseElement(Node *p)
     int choice = 0;
 
     cout << "1. Reverse via Elements \n" <<
-            "2. Reverse via Links \n " >>
+            "2. Reverse via Links \n " <<
             "Enter your choice: ";
     cin >> choice;
 
@@ -351,11 +366,77 @@ void reverseElement(Node *p)
     }
 }
 
+
+Node * concatenate(Node *actual, Node *list)
+{
+    Node *temp = new Node;
+    temp = actual;
+
+    while (temp->next != NULL)
+    {
+        temp = temp->next;
+    }
+
+    temp->next = list;
+    return temp;
+    /*  Here the problem will be: 
+    *   It will return the address of last element 
+    *   of actual and you got stuck there only.
+    *   You cannot come to the starting point if you 
+    *   donot have any reference point
+    */
+}
+
+int isLoop(Node * actual)
+{
+    Node * p = new Node;
+    Node * q = new Node;
+    Node * temp = new Node;
+
+    p = q = actual;
+    
+
+    while (actual->next != NULL)
+    {
+        static int i;
+        i++;
+        actual = actual->next;
+        if ( i == 8 )
+        {
+            temp = actual;
+        }
+    }
+    actual->next = temp;
+    int loopExists = 0;
+
+    while ( (q != NULL) )
+    {
+        q = q->next;
+        q = q->next;
+
+        if (p == q)
+        {
+            loopExists = 1;
+            break;
+        }    
+
+        p = p->next;
+
+        if (p == q)
+        {
+            loopExists = 1;
+            break;
+        }  
+    }
+
+    return loopExists;
+}
+
 int main()
 {
     int choiceSelection = 0;
     int dummyArray[] = {20, 10, 200, 20, 10, 200, 4 , 6};
-    createNode(dummyArray, sizeof(dummyArray)/sizeof(int));
+    actual = createNode(actual, dummyArray, sizeof(dummyArray)/sizeof(int));
     display(actual);
     cout << endl << endl;
     while (1)
@@ -371,6 +452,8 @@ int main()
                 "8.  Sorting of the List \n" <<
                 "9.  Removing the Duplicate Elements in the list \n" <<
                 "10. Reversing the List \n" <<
+                "11. Concatenate the List \n" <<
+                "12. Check if the Linked List in the Loop or not \n"
                 "\nEnter your choice: ";
 
         cin >> choiceSelection ; 
@@ -479,6 +562,36 @@ int main()
                 reverseElement(actual);
                 display(actual);
                 break;
+            }
+            
+            case 11:
+            {
+                int arr[] = {901, 902, 903,905, 906, 908, 998};
+                Node * list2 = new Node;
+                list2 = createNode(list2, arr, sizeof(arr)/ sizeof(int));
+                concatenate(actual, list2);
+                display(actual);
+                break;
+            }
+
+            case 12:
+            {
+                cout << "Manually merging two list and Looping them " << endl;
+                
+                int arr[] = {901, 902, 903,905, 906, 908, 998};
+                Node * list2 = new Node;
+                list2 = createNode(list2, arr, sizeof(arr)/ sizeof(int));
+                concatenate(actual, list2);
+
+                display(actual);
+
+                int condition = isLoop(actual);
+                cout << endl;
+                if (condition)
+                    cout << "Looping Exists" << endl;
+                else
+                    cout << "Looping does not Exists" << endl;
+
             }
         }
 
