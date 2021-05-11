@@ -19,29 +19,33 @@
 
 using namespace std;
 
+template <typename T>
 class Stack
 {
     private:
-        int *ptr;
+        T *ptr;
         int size;
         int topIndicator;
 
     public:
         Stack(int size = 0);
         void setStackSize (int size = 0);
-        Stack setValue(int element=0);
+        Stack setValue(T element, string type);
         void printStack(void);
         int getStackValue (int position = 0);
-        void push(int element = 0);
+        void push(T element = 0);
         void pop (void);
         int peek (int index = 0);
         bool isStackEmpty (void);
         bool isStackFull (void);
+        bool isParanthesisMatch(char *element);
 };
 
-Stack::Stack(int size)
+
+template <typename T>
+Stack<T>::Stack(int size)
 {
-    this->ptr = new int [size];
+    this->ptr = new T [size];
     this->topIndicator = -1;
 
     for (int i =0 ; i < size; i++)
@@ -50,13 +54,15 @@ Stack::Stack(int size)
     }
 }
 
-void Stack::setStackSize (int size)
+template <typename T>
+void Stack<T>::setStackSize (int size)
 {
-    this->size = size;
-    this->ptr = new int[size];
+        this->size = size;
+        this->ptr = new T[size];
 }
 
-void Stack::printStack(void)
+template <typename T>
+void Stack<T>::printStack(void)
 {
     for (int i=0; i<= this->topIndicator; i++)
     {
@@ -66,22 +72,39 @@ void Stack::printStack(void)
     cout << endl;
 }
 
-Stack Stack::setValue(int element)
+template <typename T>
+Stack<T> Stack<T>::setValue(T element, string type)
 {
-    for (int i=0; i< (element); i++)
+    if (type == "int")
+    {    
+        for (int i=0; i< (element); i++)
+        {
+            this->ptr[i] = i+1;
+            this->topIndicator++;
+        }
+    }
+    else if (type == "char")
     {
-        this->ptr[i] = i+1;
-        this->topIndicator++;
+        char dum[] = "((a+b)*(c+d))";
+        this->size = sizeof(dum);
+
+        for (int i=0; i< (strlen(dum)); i++)
+        {
+            this->ptr[i] = dum[i];
+            this->topIndicator++;
+        }
     }
     return *this;
 }
 
-int Stack::getStackValue (int position)
+template <typename T>
+int Stack<T>::getStackValue (int position)
 {
 
 }
 
-void Stack::push(int element)
+template <typename T>
+void Stack<T>::push(T element)
 {
     if (this->topIndicator == (this->size - 1))
         cout << "Stack Overflow" << endl;
@@ -92,8 +115,8 @@ void Stack::push(int element)
     }
 }
 
-
-void Stack::pop (void)
+template <typename T>
+void Stack<T>::pop (void)
 {
     if (this->topIndicator == -1)
         cout << "Stack Underflow" << endl;
@@ -103,7 +126,8 @@ void Stack::pop (void)
     }
 }
 
-int Stack::peek (int index)
+template <typename T>
+int Stack<T>::peek (int index)
 {
     if ((this->topIndicator - index + 1) > -1)
     {
@@ -120,23 +144,49 @@ int Stack::peek (int index)
     }
 }
 
-bool Stack::isStackEmpty (void)
+template <typename T>
+bool Stack<T>::isStackEmpty (void)
 {
     if (this->topIndicator == -1)   return 1;
     return 0;
 }
 
-bool Stack::isStackFull (void)
+template <typename T>
+bool Stack<T>::isStackFull (void)
 {
     if (this->topIndicator == (this->size - 1))   return 1;
     return 0;
 }
 
+// ************************************************************//
+// ************************************************************//
+// ************************************************************//
+
+template <typename T>
+bool Stack<T>::isParanthesisMatch(char *element)
+{
+    cout<< this->topIndicator;  // else stack overflow will happen
+    this->size += 1;
+    for (int i = 0 ; i < this->topIndicator; i++)
+    {
+        if (this->ptr[i] == '(')
+        {
+            this->push('(');
+        }
+        else if (this->ptr[i] == ')')
+        {
+            this->pop();
+        }
+    }
+}
+
+
 int main()
 {
-    Stack stk(10);
+    Stack<int> stk(10);
     stk.setStackSize(5);
-    stk = stk.setValue(3);
+    stk = stk.setValue(3, "int");
+
     cout << "Initial Stack: ";
     stk.printStack();
     cout << "Push Operation: ";
@@ -155,4 +205,17 @@ int main()
     x = stk.isStackFull();
     if(x)   cout << "Stack is Filled" << endl;
     else    cout << "Stack is not Filled" << endl;
+
+
+    cout << endl << endl << "----String Parenthesis Matching----\n" ;
+
+    Stack<char> stkString;
+    stkString.setStackSize(10);
+    char dum[] = "((a+b)*(c+d))";
+    stkString.setValue(dum[0], "char");
+    stkString.printStack();
+    cout << "String Filled: " << stkString.isStackFull();
+
+    char search[] = "(";
+    stkString.isParanthesisMatch(search);
 }
