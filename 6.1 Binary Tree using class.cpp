@@ -21,296 +21,363 @@
 
 using namespace std;
 
-// ***************************************************************************************** //
-// ****************************  Definitions ********************************************** //
-// ***************************************************************************************** //
-
-
-struct tree
+struct treeNode
 {
-    tree *leftValue;
-    int data;
-    tree *rightValue;
+    int val;
+    treeNode *left;
+    treeNode *right;
+    treeNode(int x) : val(x), left(NULL), right(NULL) {}
 };
 
-struct Stack
+struct xQueue
+{
+    treeNode *data;
+    xQueue *next;
+    xQueue(treeNode *x) : data(x), next(NULL) {}
+    xQueue() : data(NULL), next(NULL) {}
+    int size;
+    xQueue *head;
+    xQueue *tail;
+    bool is_queue_empty(void)
+    {
+        return size == 0;
+    }
+    void push(treeNode *x)
+    {
+        xQueue *new_node = new xQueue(x);
+        if (is_queue_empty())
+        {
+            head = new_node;
+            tail = new_node;
+        }
+        else
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+        size++;
+    }
+    void pop(void)
+    {
+        if (is_queue_empty())
+            return;
+        xQueue *temp = head;
+        head = head->next;
+        delete temp;
+        size--;
+    }
+    treeNode *front(void)
+    {
+        if (is_queue_empty())
+            return NULL;
+        return head->data;
+    }
+    void make_queue_empty(void)
+    {
+        while (!is_queue_empty())
+        {
+            pop();
+        }
+    }
+};
+xQueue qtreeNode;
+
+struct xStack
 {
     int data;
-    Stack *next;
+    xStack *next;
+    xStack(int x) : data(x), next(NULL) {}
+    int size;
+    xStack *top;
+
+    bool is_stack_empty(void)
+    {
+        return size == 0;
+    }
+    void push(int x)
+    {
+        xStack *new_node = new xStack(x);
+        new_node->next = top;
+        top = new_node;
+        size++;
+    }
+    void pop(void)
+    {
+        if (is_stack_empty())
+            return;
+        xStack *temp = top;
+        top = top->next;
+        delete temp;
+        size--;
+    }
+    int peek(void)
+    {
+        if (is_stack_empty())
+            return -1;
+        return top->data;
+    }
 };
 
-struct Queue
+class binary_tree
 {
-    int data;
-    Queue *next;
-}*actualQueue , *pushQueue, *popQueue;
-
-// ***************************************************************************************** //
-// ************************* Creating Class ********************************************** //
-// ***************************************************************************************** //
-
-class binaryTree
-{
-    private:
-        tree *Root = new tree;
-
-        int queueSize = 0;
-        int queueCounts = 0;
-
-        Stack *actualStack = new Stack;
-
-    public:
-        binaryTree(int size = 0);
-
-        binaryTree createNodeTree(void);
-        void createQueue(tree *headTree);
-        void queuePush(tree *headTree);
-        int queuePop(void);
-        bool isQueueEmpty();
-        void displayTree(void);
-
-        void stackPush(tree *headTree);
-        int stackPop(void);
-
+public:
+    treeNode *present_node;
+    binary_tree() : present_node(NULL) {}
+    void create_binary_tree(void);
+    int countnodes(treeNode *root);
+    int sum_of_nodes(treeNode *root);
+    int height_of_tree(treeNode *root);
+    int count_leaf_nodes(treeNode *root);
+    int count_non_leaf_nodes(treeNode *root);
+    int sum_of_range(treeNode *root, int low, int high);
+    int add_node(treeNode *root, int val);
+    int delete_node(treeNode *root, int val);
+    void print_all_nodes(treeNode *root);
 };
 
-// ***************************************************************************************** //
-// ************************* Tree Operations ********************************************** //
-// ***************************************************************************************** //
-
-binaryTree::binaryTree(int size)
+void binary_tree::create_binary_tree(void)
 {
-    actualQueue = new Queue;
-    this->queueSize = size;
+    present_node = new treeNode(0);
+    cout << "Enter the Root Value: ";
+    cin >> present_node->val;
+    present_node->left = NULL;
+    present_node->right = NULL;
+    cout << "Root Node created with value: " << present_node->val << endl;
+    qtreeNode.push(present_node);
+    cout << "Enter the Left and Right Values of " << present_node->val << " (Enter 0 for NULL): " << endl;
 
-    pushQueue = actualQueue;
-    popQueue = actualQueue;
+    while (!qtreeNode.is_queue_empty())
+    {
+        treeNode *temp = qtreeNode.front();
+        cout << "Processing Node: " << temp->val << endl;
+        qtreeNode.pop();
+        cout << "Enter the Left and Right Values of " << temp->val << " (Enter 0 for NULL): " << endl;
+        int left_val, right_val;
+        cout << "Enter the Left Value of " << temp->val << ": ";
+        cin >> left_val;
+        if (left_val != 0)
+        {
+            temp->left = new treeNode(left_val);
+            qtreeNode.push(temp->left);
+        }
+        else
+        {
+            temp->left = NULL;
+        }
+        cout << "Enter the Right Value of " << temp->val << ": ";
+        cin >> right_val;
+        if (right_val != 0)
+        {
+            temp->right = new treeNode(right_val);
+            qtreeNode.push(temp->right);
+        }
+        else
+        {
+            temp->right = NULL;
+        }
+    }
 }
 
-binaryTree binaryTree::createNodeTree()
+int binary_tree::add_node(treeNode *root, int val)
 {
-    tree *tempRoot = new tree;
-
-    cout << "Enter Root Value: ";
-    cin >> this->Root->data;
-    this->Root->leftValue = 0;
-    this->Root->rightValue = 0;
-
-    this->queuePush(this->Root);
-
-    while ( this->isQueueEmpty())
+    if (root == NULL)
     {
-        tempRoot =  (tree*)this->queuePop();
-
-        int leftChild = 0, rightChild = 0;
-
-        cout << "Enter Child values for " << tempRoot->data << ": ";
-        cout << "\nLeft Child: ";
-        cin >> leftChild;
-        cout << "Right Child: ";
-        cin >> rightChild;
-
-        if (leftChild <= 0)
-        {
-            tempRoot->leftValue = 0;
-        }
-        else
-        {
-            tree *dummyTree = new tree;
-            dummyTree->data = leftChild;
-            dummyTree->leftValue = 0;
-            dummyTree->rightValue = 0;
-
-            tempRoot->leftValue = dummyTree;
-            this->queuePush(dummyTree);
-
-            dummyTree = NULL;
-            delete [] dummyTree;
-        }
-
-        if (rightChild <= 0)
-        {
-            tempRoot->rightValue = 0;
-        }
-        else
-        {
-            tree *dummyTree = new tree;
-            dummyTree->data = rightChild;
-            dummyTree->leftValue = 0;
-            dummyTree->rightValue = 0;
-
-            tempRoot->rightValue = dummyTree;
-            this->queuePush(dummyTree);
-
-            tempRoot = dummyTree;
-            tempRoot = NULL;
-            dummyTree = NULL;
-            delete [] dummyTree;
-            delete [] tempRoot;
-        }
+        root = new treeNode(val);
+        return 1;
     }
-}
-
-
-// ***************************************************************************************** //
-// ************************* Queue Operations ********************************************** //
-// ***************************************************************************************** //
-
-    void binaryTree::queuePush(tree *headTree)
+    if (val < root->val)
     {
-        if ( this->queueCounts <= (this->queueSize - 1) )
-        {
-            if (this->queueCounts == 0)
-            {
-                actualQueue->data = (int)headTree;
-                actualQueue->next = 0;
-            }
-            else
-            {
-                Queue *dummyQueue = new Queue;
-                dummyQueue->data = (int)headTree;
-                dummyQueue->next = 0;
-                pushQueue->next = dummyQueue;
-                pushQueue = dummyQueue;
-
-                dummyQueue = NULL;
-                delete [] dummyQueue;
-            }
-            this->queueCounts++;
-        }
-        else
-            cout << "\nQueue is full \n" << endl;
+        return add_node(root->left, val);
     }
-
-    int binaryTree::queuePop(void)
+    else if (val > root->val)
     {
-        static int popCounts;
-        int value = 0;
-
-        if( (!popCounts) || (popCounts == (this->queueSize - 1)) )
-        {   
-            value = actualQueue->data;
-        }
-        else
-        {
-            actualQueue = actualQueue->next;
-            popQueue->next = NULL;
-            popQueue->data = 0;
-            popQueue = actualQueue;
-
-            value = actualQueue->data;
-        }
-        popCounts++;
-        return value;
-    }
-
-    bool binaryTree::isQueueEmpty()
-    {
-        if (this->queueCounts < this->queueSize)    return 1;
-        return 0;
-    }
-
-
-
-// ***************************************************************************************** //
-// ************************* Stack Operations ********************************************** //
-// ***************************************************************************************** //
-
-void binaryTree::stackPush(tree *headTree)
-{
-    static int pushCounts;
-
-    if (pushCounts < this->queueSize)
-    {
-        static Stack *tempStack = new Stack;
-        if (!pushCounts)
-        {
-            this->actualStack->data = (int)headTree;
-            this->actualStack->next = 0;
-            tempStack = this->actualStack;
-        }
-        else
-        {
-            Stack *dummyStack = new Stack;
-            dummyStack->data = (int)headTree;
-            dummyStack->next = 0;
-
-            tempStack->next = dummyStack;
-            tempStack = dummyStack;
-
-            dummyStack = NULL;
-            delete [] dummyStack;
-        }
-
-        pushCounts++;
+        return add_node(root->right, val);
     }
     else
-        cout << "\nStack is Full\n" << endl;
+    {
+        return 0;
+    }
 }
 
-int binaryTree::stackPop(void)
+int binary_tree::delete_node(treeNode *root, int val)
 {
-    Stack *headStack = new Stack;
-    Stack *followStack = new Stack;
-    headStack = this->actualStack;
-    followStack = this->actualStack;
-
-    if( headStack->next != NULL)
+    if (root == NULL)
     {
-        headStack = headStack->next;
+        qtreeNode.make_queue_empty();
+        return 0; // Value not found in the tree
     }
 
-    while(headStack->next != NULL)
+    if (val < root->val)
     {
-        headStack = headStack->next;
+        qtreeNode.push(root);
+        return delete_node(root->left, val);
     }
-    int value = headStack->data;
-
-    followStack->next = 0;
-
-    headStack = NULL;
-    followStack = NULL;
-    delete [] headStack;
-    delete [] followStack;
-
-    return value;
-
-}
-
-
-// ***************************************************************************************** //
-// ***************************  Operations ************************************************ //
-// ***************************************************************************************** //
-
-    void binaryTree::displayTree()
+    else if (val > root->val)
     {
-        tree *presentNode = this->Root;
-        static int Counts;
-
-        cout << "\nTree Nodes Values are: \n" << presentNode->data << "  ";
-        while ( (presentNode != NULL) && (Counts < ( this->queueSize - 1) ) )
+        qtreeNode.push(root);
+        return delete_node(root->right, val);
+    }
+    else
+    {
+        treeNode *temp;
+        if (!qtreeNode.is_queue_empty())
         {
-            if (presentNode->leftValue != NULL)
+            temp = qtreeNode.front();
+        }
+        // Node to be deleted found
+        if (root->left == NULL && root->right == NULL)
+        {
+            if (temp->left = root)
             {
-                this->stackPush(presentNode->leftValue);
-                cout << presentNode->leftValue->data << "  ";
-                Counts++;
+                temp
             }
-            if (presentNode->rightValue != NULL)
+            else if (temp->right = root)
             {
-                this->stackPush(presentNode->rightValue);
-                cout << presentNode->rightValue->data << "  ";
-                Counts++;
             }
-            presentNode = (tree*)this->stackPop();
+            delete root;
+            root = NULL;
+            return 1; // Node deleted successfully
+        }
+        else if (root->left == NULL)
+        {
+            treeNode *temp = root;
+            root = root->right;
+            delete temp;
+            return 1; // Node deleted successfully
+        }
+        else if (root->right == NULL)
+        {
+            treeNode *temp = root;
+            root = root->left;
+            delete temp;
+            return 1; // Node deleted successfully
+        }
+        else
+        {
+            // Node with two children: Get the inorder successor (smallest in the right subtree)
+            treeNode *temp = root->right;
+            while (temp->left != NULL)
+                temp = temp->left;
+
+            // Copy the inorder successor's content to this node
+            root->val = temp->val;
+
+            // Delete the inorder successor
+            return delete_node(root->right, temp->val);
         }
     }
+}
 
-int main(void)
+void binary_tree::print_all_nodes(treeNode *root)
 {
-    actualQueue = new Queue;
+    if (root == NULL)
+        return;
+    cout << root->val << " ";
+    print_all_nodes(root->left);
+    print_all_nodes(root->right);
+}
 
-    binaryTree strictBinaryTree(7);
-    strictBinaryTree.createNodeTree();
-    strictBinaryTree.displayTree();
+int binary_tree::countnodes(treeNode *root)
+{
+    if (root == NULL)
+        return 0;
+    return (1 + countnodes(root->left) + countnodes(root->right));
+
+    // xQueue temp;
+    // int count = 1;
+    // if (root == NULL)
+    //     return 0;
+
+    // temp.push(root);
+    // while (!temp.is_queue_empty())
+    // {
+    //     treeNode *current = temp.front();
+    //     temp.pop();
+    //     if (current->left != NULL)
+    //     {
+    //         temp.push(current->left);
+    //         count++;
+    //     }
+    //     if (current->right != NULL)
+    //     {
+    //         temp.push(current->right);
+    //         count++;
+    //     }
+    // }
+    // return count;
+}
+
+int binary_tree::sum_of_nodes(treeNode *root)
+{
+    if (root == NULL)
+        return 0;
+    return (root->val + sum_of_nodes(root->left) + sum_of_nodes(root->right));
+}
+
+int binary_tree::sum_of_range(treeNode *root, int low, int high)
+{
+    if (root == NULL)
+        return 0;
+    if (root->val < low)
+        return sum_of_range(root->right, low, high);
+    if (root->val > high)
+        return sum_of_range(root->left, low, high);
+    return (root->val + sum_of_range(root->left, low, high) + sum_of_range(root->right, low, high));
+}
+
+int binary_tree::height_of_tree(treeNode *root)
+{
+    if (root == NULL)
+        return 0;
+    return (1 + max(height_of_tree(root->left), height_of_tree(root->right)));
+}
+
+int binary_tree::count_leaf_nodes(treeNode *root)
+{
+    if (root == NULL)
+        return 0;
+    if (root->left == NULL && root->right == NULL)
+        return 1;
+    return (count_leaf_nodes(root->left) + count_leaf_nodes(root->right));
+}
+
+int binary_tree::count_non_leaf_nodes(treeNode *root)
+{
+    if (root == NULL)
+        return 0;
+    if (root->left == NULL && root->right == NULL)
+        return 0;
+    return (1 + count_non_leaf_nodes(root->left) + count_non_leaf_nodes(root->right));
+}
+
+int main()
+{
+    binary_tree btree;
+    btree.create_binary_tree();
+    int total_nodes = btree.countnodes(btree.present_node);
+    cout << "Total nodes: " << total_nodes << endl;
+    int sum_nodes = btree.sum_of_nodes(btree.present_node);
+    cout << "Sum of nodes: " << sum_nodes << endl;
+    int height_tree = btree.height_of_tree(btree.present_node);
+    cout << "Height of tree: " << height_tree << endl;
+    int leaf_nodes = btree.count_leaf_nodes(btree.present_node);
+    cout << "Leaf nodes: " << leaf_nodes << endl;
+    int non_leaf_nodes = btree.count_non_leaf_nodes(btree.present_node);
+    cout << "Non-leaf nodes: " << non_leaf_nodes << endl;
+    int sum_range = btree.sum_of_range(btree.present_node, 5, 15);
+    cout << "Sum of nodes in range [5, 15]: " << sum_range << endl;
+    // bool added = btree.add_node(btree.present_node, 10);
+    // if (added)
+    //     cout << "Node with value 10 added successfully." << endl;
+    // else
+    //     cout << "Node with value 10 already exists in the tree." << endl;
+    btree.print_all_nodes(btree.present_node);
+    // bool deleted = btree.delete_node(btree.present_node, 5);
+    // if (deleted)
+    //     cout << "Node with value 5 deleted successfully." << endl;
+    // else
+    //     cout << "Node with value 5 not found in the tree." << endl;
+
+    // btree.print_all_nodes(btree.present_node);
+    return 0;
 }
